@@ -4,7 +4,7 @@
   "rules": {
     "no-console": {
       "severity": "error",
-      "options": ["debug", "info", "log", "trace"]
+      "options": ["debug", "info", "trace"]
     },
     "max-line-length": [true, 100],
     "semicolon": {
