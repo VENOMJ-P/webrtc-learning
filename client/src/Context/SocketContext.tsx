@@ -1,8 +1,10 @@
 import SocketIoClient from "socket.io-client";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useReducer, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Peer from "peerjs"
 import {v4 as UUId} from "uuid"
+import { peerReducer } from "../Reducers/peerReducer";
+import { addPeerAction } from "../Actions/peerActions";
 
 const WS_Server = "http://localhost:5500";
 
@@ -22,6 +24,7 @@ const SocketProvider: React.FC<Props> = ({ children }) => {
 
   const [user,setUser] = useState<Peer>() //new peer user
   const [stream,setStream] = useState<MediaStream>();
+  const [peers,dispatch] = useReducer(peerReducer,{})
 
   const fetchParticipants = ({participants,roomId}:{participants:string[],roomId:string}) =>{
       console.log(roomId,participants)
@@ -59,8 +62,35 @@ const SocketProvider: React.FC<Props> = ({ children }) => {
     };
   }, []);
 
+
+  useEffect(()=>{
+    if(!user || !stream ) return;
+
+    // 2
+    socket.on("user-joined",({peerId})=>{
+      const call = user.call(peerId,stream) //Calls the remote peer specified by id and returns a media connection.
+      console.log("Calling the new peer",peerId)
+      call.on("stream",()=>{
+        dispatch(addPeerAction(peerId,stream));
+      })
+    })
+
+    // 3
+    user.on("call",(call)=>{
+      // what to do when other peers on the group call  you when y joined
+      console.log("receving a call");
+      call.answer(stream);
+      call.on("stream",()=>{
+        dispatch(addPeerAction(call.peer,stream));
+      })        
+    })
+
+    // 1
+    socket.emit("ready")
+  },[user,stream])
+
   return (
-    <SocketContext.Provider value={{socket, user, stream}}>
+    <SocketContext.Provider value={{socket, user, stream, peers}}>
       {children}
     </SocketContext.Provider>
   );

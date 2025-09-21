@@ -36,9 +36,11 @@ const roomHandler = (socket: Socket) => {
                 roomId,
             });
 
-            socket.to(roomId).emit("user-joined", {
-                participants: rooms[roomId],
-                roomId,
+            socket.on("ready", () => {
+                // from the frontend once someone join the room we will emit a ready event
+                // then from our server we will emit an event to all the client conn
+                // that a new peer has added
+                socket.to(roomId).emit("user-joined", {peerId});
             });
 
         }
@@ -62,7 +64,7 @@ const roomHandler = (socket: Socket) => {
                 roomId,
             });
 
-            socket.to(roomId).emit("user-joined", {
+            socket.to(roomId).emit("get-users", {
                 participants: rooms[roomId],
                 roomId,
             });
