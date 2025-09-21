@@ -27,7 +27,33 @@ const roomHandler = (socket: Socket) => {
             rooms[roomId].push(peerId);
             socket.join(roomId);
 
+            // Store for disconnect cleanup
+            socket.data.roomId = roomId;
+            socket.data.peerId = peerId;
+
+
             socket.emit("get-users", {
+                participants: rooms[roomId],
+                roomId,
+            });
+        }
+    };
+
+    const disconnect = ({ roomId, peerId }: IRoomParams) => {
+        if (rooms[roomId]) {
+            // Remove the peerId from the room's participant list
+            rooms[roomId] = rooms[roomId].filter(id => id !== peerId);
+
+            // If the room is now empty, optionally delete it
+            if (rooms[roomId].length === 0) {
+                delete rooms[roomId];
+                console.log(`Room ${roomId} deleted as it became empty`);
+            } else {
+                console.log(`Peer ${peerId} removed from room ${roomId}`);
+            }
+
+            // Broadcast updated participant list to remaining users
+            socket.to(roomId).emit("get-users", {
                 participants: rooms[roomId],
                 roomId,
             });
@@ -38,6 +64,9 @@ const roomHandler = (socket: Socket) => {
     socket.on("create-room", createRoom);
     socket.on("joined-room", joinedRoom);
 
+    return {
+        disconnect,
+    };
 };
 
 export default roomHandler;

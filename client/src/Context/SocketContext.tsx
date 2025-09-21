@@ -21,6 +21,16 @@ const SocketProvider: React.FC<Props> = ({ children }) => {
   // state variable to store the userId
 
   const [user,setUser] = useState<Peer>() //new peer user
+  const [stream,setStream] = useState<MediaStream>();
+
+  const fetchParticipants = ({roomId,participants}:{roomId:string,participants:string[]}) =>{
+      console.log(roomId,participants)
+  }
+
+  const fetchUserFeed = async()=>{
+    const stream = await navigator.mediaDevices.getUserMedia({video:true,audio:true})
+    setStream(stream)    
+  }
 
 
   useEffect(() => {
@@ -28,6 +38,8 @@ const SocketProvider: React.FC<Props> = ({ children }) => {
     const newPeer = new Peer(userId);
 
     setUser(newPeer)
+    fetchUserFeed()
+
     const enterRoom = ({roomId}:{roomId: string}) => {
       console.log(roomId)
       navigate(`/room/${roomId}`);
@@ -36,13 +48,15 @@ const SocketProvider: React.FC<Props> = ({ children }) => {
     // we will transer the user to the room when we collect an event of room created from server
     socket.on("room-created",enterRoom)
 
+    socket.on('get-users',fetchParticipants)
+
     return () => {
       socket.off("room-created", enterRoom);
     };
   }, []);
 
   return (
-    <SocketContext.Provider value={{socket, user}}>
+    <SocketContext.Provider value={{socket, user, stream}}>
       {children}
     </SocketContext.Provider>
   );

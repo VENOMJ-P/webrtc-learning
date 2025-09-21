@@ -20,9 +20,15 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
     console.log("New User Connected");
     // pass the socket connection to the room handler for room creation and joining
-    roomHandler(socket);
+    const handler = roomHandler(socket);
     socket.on("disconnect", () => {
         console.log("User Disconnected");
+        if (socket.data.roomId && socket.data.peerId) {
+            handler.disconnect({
+                roomId: socket.data.roomId,
+                peerId: socket.data.peerId,
+            });
+        }
     });
 });
 
