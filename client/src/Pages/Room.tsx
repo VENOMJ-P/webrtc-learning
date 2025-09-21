@@ -8,10 +8,8 @@ const Room:React.FC = () => {
     const {socket,user,stream} = useContext(SocketContext)
     
     useEffect(() => {
-        console.log(user)
         if (user && socket && id) {
-            console.log("joining",user._id)
-            socket.emit("joined-room", { roomId: id, peerId:user._id});
+            socket.emit("joined-room", {  peerId:user._id, roomId: id});
             console.log("Joined room:", id);
         }
     }, [id,socket,user]);

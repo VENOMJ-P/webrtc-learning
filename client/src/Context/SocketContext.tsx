@@ -23,7 +23,7 @@ const SocketProvider: React.FC<Props> = ({ children }) => {
   const [user,setUser] = useState<Peer>() //new peer user
   const [stream,setStream] = useState<MediaStream>();
 
-  const fetchParticipants = ({roomId,participants}:{roomId:string,participants:string[]}) =>{
+  const fetchParticipants = ({participants,roomId}:{participants:string[],roomId:string}) =>{
       console.log(roomId,participants)
   }
 

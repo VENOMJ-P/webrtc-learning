@@ -5,7 +5,7 @@ const CreateRoom:React.FC = () => {
   const {socket} = useContext(SocketContext)
 
   const initRoom = ()=>{
-    console.log(socket)
+    console.log("creating room",socket)
     socket.emit("create-room")
   }
 
