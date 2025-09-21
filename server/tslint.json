@@ -6,7 +6,6 @@
       "severity": "error",
       "options": ["debug", "info", "trace"]
     },
-    "max-line-length": [true, 100],
     "semicolon": {
       "options": ["always"]
     }
