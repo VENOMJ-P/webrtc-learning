@@ -25,8 +25,8 @@ io.on("connection", (socket) => {
         console.log("User Disconnected");
         if (socket.data.roomId && socket.data.peerId) {
             handler.disconnect({
-                roomId: socket.data.roomId,
                 peerId: socket.data.peerId,
+                roomId: socket.data.roomId,
             });
         }
     });

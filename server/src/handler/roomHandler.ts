@@ -19,7 +19,7 @@ const roomHandler = (socket: Socket) => {
 
     // The below function is executed everytime a user(creator or new user) joins in a new room
 
-    const joinedRoom = ({ peerId,roomId}: IRoomParams) => {
+    const joinedRoom = ({ peerId, roomId}: IRoomParams) => {
         if (rooms[roomId]) {
             // If the give roomId exist in the memory db
             console.log("New user has join room", roomId, " with peer id ", peerId);
@@ -35,13 +35,19 @@ const roomHandler = (socket: Socket) => {
                 participants: rooms[roomId],
                 roomId,
             });
+
+            socket.to(roomId).emit("user-joined", {
+                participants: rooms[roomId],
+                roomId,
+            });
+
         }
     };
 
-    const disconnect = ({ roomId, peerId }: IRoomParams) => {
+    const disconnect = ({ peerId, roomId }: IRoomParams) => {
         if (rooms[roomId]) {
             // Remove the peerId from the room's participant list
-            rooms[roomId] = rooms[roomId].filter(id => id !== peerId);
+            rooms[roomId] = rooms[roomId].filter((id) => id !== peerId);
 
             // If the room is now empty, optionally delete it
             if (rooms[roomId].length === 0) {
@@ -51,8 +57,12 @@ const roomHandler = (socket: Socket) => {
                 console.log(`Peer ${peerId} removed from room ${roomId}`);
             }
 
-            // Broadcast updated participant list to remaining users
             socket.emit("get-users", {
+                participants: rooms[roomId],
+                roomId,
+            });
+
+            socket.to(roomId).emit("user-joined", {
                 participants: rooms[roomId],
                 roomId,
             });

@@ -6,11 +6,21 @@ import UserFeedPlayer from '../Components/UserFeedPlayer';
 const Room:React.FC = () => {
     const {id}=useParams();
     const {socket,user,stream} = useContext(SocketContext)
+
+    const fetchParticipants = ({participants,roomId}:{participants:string[],roomId:string}) =>{
+        console.log(roomId,participants)
+    }
     
     useEffect(() => {
         if (user && socket && id) {
             socket.emit("joined-room", {  peerId:user._id, roomId: id});
             console.log("Joined room:", id);
+
+            socket.on('user-joined', fetchParticipants);
+
+            return () => {
+            socket.off('user-joined', fetchParticipants);
+            };
         }
     }, [id,socket,user]);
     return (
